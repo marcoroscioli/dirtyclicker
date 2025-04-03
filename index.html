@@ -1,0 +1,1000 @@
+I'll expand the game with more upgrades and miner types to make it more engaging!
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dirt Block Clicker</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #87CEEB;
+      background-image: linear-gradient(to bottom, #87CEEB, #4682B4);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    #game-container {
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+      max-width: 800px;
+      width: 100%;
+    }
+    
+    #info-panel {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .stats {
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      font-weight: bold;
+      flex: 1;
+      min-width: 150px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    #dirt-block {
+      width: 120px;
+      height: 120px;
+      background-color: #8B4513;
+      background-image: linear-gradient(45deg, #8B4513 25%, #A0522D 25%, #A0522D 50%, #8B4513 50%, #8B4513 75%, #A0522D 75%, #A0522D 100%);
+      background-size: 20px 20px;
+      margin: 20px auto;
+      cursor: pointer;
+      transition: transform 0.1s;
+      border: 3px solid #333;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+    
+    #dirt-block:active {
+      transform: scale(0.95);
+    }
+    
+    #dirt-block::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 100%);
+    }
+    
+    #upgrades {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .upgrade-button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60px;
+    }
+    
+    .upgrade-button:hover:not(:disabled) {
+      background-color: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .upgrade-button:disabled {
+      background-color: #cccccc;
+      color: #666666;
+      cursor: not-allowed;
+    }
+    
+    .miner-button {
+      background-color: #3f51b5;
+    }
+    
+    .miner-button:hover:not(:disabled) {
+      background-color: #303f9f;
+    }
+    
+    .tool-button {
+      background-color: #ff9800;
+    }
+    
+    .tool-button:hover:not(:disabled) {
+      background-color: #f57c00;
+    }
+    
+    .special-button {
+      background-color: #9c27b0;
+    }
+    
+    .special-button:hover:not(:disabled) {
+      background-color: #7b1fa2;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background-color: #8B4513;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    #achievement-popup {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: gold;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: bold;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+    
+    #miners-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f0f0f0;
+      border-radius: 8px;
+    }
+    
+    .miner-info {
+      padding: 10px;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      text-align: left;
+      min-width: 150px;
+      flex: 1;
+    }
+    
+    .miner-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .prestige-section {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #ffe0b2;
+      border-radius: 8px;
+      display: none;
+    }
+    
+    .tab-container {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+    }
+    
+    .tab-button {
+      background-color: #ddd;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px 5px 0 0;
+      cursor: pointer;
+    }
+    
+    .tab-button.active {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 15px;
+      background-color: #f0f0f0;
+      border-radius: 0 8px 8px 8px;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="achievement-popup"></div>
+  
+  <div id="game-container">
+    <h1>Dirt Block Clicker</h1>
+    
+    <div id="info-panel">
+      <div class="stats">
+        <div>Dirt: <span id="dirt-count">0</span></div>
+        <div>Per Click: <span id="per-click">1</span></div>
+      </div>
+      <div class="stats">
+        <div>Total DPS: <span id="dirt-per-second">0</span></div>
+        <div>Golden Shovels: <span id="prestige-count">0</span></div>
+      </div>
+    </div>
+    
+    <div id="dirt-block"></div>
+    
+    <div class="tab-container">
+      <button class="tab-button active" data-tab="tools">Tools</button>
+      <button class="tab-button" data-tab="miners">Miners</button>
+      <button class="tab-button" data-tab="special">Special</button>
+    </div>
+    
+    <div id="tools-tab" class="tab-content active">
+      <div id="upgrades" class="tools-upgrades">
+        <button id="upgrade-shovel" class="upgrade-button tool-button">
+          Upgrade Shovel<br>Cost: 10
+        </button>
+        <button id="upgrade-gloves" class="upgrade-button tool-button">
+          Mining Gloves<br>Cost: 50
+        </button>
+        <button id="upgrade-drill" class="upgrade-button tool-button">
+          Hand Drill<br>Cost: 200
+        </button>
+        <button id="upgrade-jackhammer" class="upgrade-button tool-button">
+          Jackhammer<br>Cost: 1000
+        </button>
+      </div>
+    </div>
+    
+    <div id="miners-tab" class="tab-content">
+      <div id="miners-container"></div>
+      <div id="upgrades" class="miners-upgrades">
+        <button id="buy-novice-miner" class="upgrade-button miner-button">
+          Novice Miner<br>Cost: 25
+        </button>
+        <button id="buy-skilled-miner" class="upgrade-button miner-button">
+          Skilled Miner<br>Cost: 100
+        </button>
+        <button id="buy-expert-miner" class="upgrade-button miner-button">
+          Expert Miner<br>Cost: 500
+        </button>
+        <button id="buy-mining-robot" class="upgrade-button miner-button">
+          Mining Robot<br>Cost: 2500
+        </button>
+        <button id="upgrade-miners" class="upgrade-button miner-button">
+          Upgrade All Miners<br>Cost: 50
+        </button>
+      </div>
+    </div>
+    
+    <div id="special-tab" class="tab-content">
+      <div id="upgrades" class="special-upgrades">
+        <button id="buy-lucky-charm" class="upgrade-button special-button">
+          Lucky Charm<br>Cost: 150
+        </button>
+        <button id="buy-treasure-map" class="upgrade-button special-button">
+          Treasure Map<br>Cost: 750
+        </button>
+        <button id="buy-magnifying-glass" class="upgrade-button special-button">
+          Magnifying Glass<br>Cost: 1500
+        </button>
+        <button id="prestige-button" class="upgrade-button special-button">
+          Reset for Golden Shovel<br>Need: 1000 dirt
+        </button>
+      </div>
+      
+      <div class="prestige-section" id="prestige-section">
+        <h3>Golden Shovel Bonuses</h3>
+        <p>Each Golden Shovel gives +20% to all dirt production</p>
+        <p>Current bonus: <span id="prestige-bonus">0</span>%</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Game variables
+      let gameState = {
+        dirt: 0,
+        perClick: 1,
+        shovelLevel: 1,
+        glovesLevel: 0,
+        drillLevel: 0,
+        jackhammerLevel: 0,
+        
+        minerLevel: 1,
+        noviceMiners: 0,
+        skilledMiners: 0,
+        expertMiners: 0,
+        miningRobots: 0,
+        
+        luckyCharm: 0,
+        treasureMap: 0,
+        magnifyingGlass: 0,
+        
+        prestigeCount: 0,
+        prestigeBonus: 1.0,
+        
+        // Costs
+        shovelCost: 10,
+        glovesCost: 50,
+        drillCost: 200,
+        jackhammerCost: 1000,
+        
+        noviceMinerCost: 25,
+        skilledMinerCost: 100,
+        expertMinerCost: 500,
+        miningRobotCost: 2500,
+        minerUpgradeCost: 50,
+        
+        luckyCharmCost: 150,
+        treasureMapCost: 750,
+        magnifyingGlassCost: 1500,
+        
+        achievements: {
+          dirt10: false,
+          dirt100: false,
+          dirt500: false,
+          dirt5000: false,
+          miners5: false,
+          prestige1: false
+        }
+      };
+      
+      // Miner properties
+      const minerTypes = {
+        novice: { name: "Novice Miner", basePower: 1 },
+        skilled: { name: "Skilled Miner", basePower: 5 },
+        expert: { name: "Expert Miner", basePower: 25 },
+        robot: { name: "Mining Robot", basePower: 100 }
+      };
+      
+      // DOM elements
+      const dirtBlock = document.getElementById('dirt-block');
+      const dirtCount = document.getElementById('dirt-count');
+      const perClick = document.getElementById('per-click');
+      const dirtPerSecond = document.getElementById('dirt-per-second');
+      const prestigeCount = document.getElementById('prestige-count');
+      const prestigeBonus = document.getElementById('prestige-bonus');
+      const minerContainer = document.getElementById('miners-container');
+      const achievementPopup = document.getElementById('achievement-popup');
+      const prestigeSection = document.getElementById('prestige-section');
+      
+      // Tool upgrade buttons
+      const upgradeShovelBtn = document.getElementById('upgrade-shovel');
+      const upgradeGlovesBtn = document.getElementById('upgrade-gloves');
+      const upgradeDrillBtn = document.getElementById('upgrade-drill');
+      const upgradeJackhammerBtn = document.getElementById('upgrade-jackhammer');
+      
+      // Miner buttons
+      const buyNoviceMinerBtn = document.getElementById('buy-novice-miner');
+      const buySkilledMinerBtn = document.getElementById('buy-skilled-miner');
+      const buyExpertMinerBtn = document.getElementById('buy-expert-miner');
+      const buyMiningRobotBtn = document.getElementById('buy-mining-robot');
+      const upgradeMinersBtn = document.getElementById('upgrade-miners');
+      
+      // Special buttons
+      const buyLuckyCharmBtn = document.getElementById('buy-lucky-charm');
+      const buyTreasureMapBtn = document.getElementById('buy-treasure-map');
+      const buyMagnifyingGlassBtn = document.getElementById('buy-magnifying-glass');
+      const prestigeButton = document.getElementById('prestige-button');
+      
+      // Tab navigation
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const tabName = button.getAttribute('data-tab');
+          
+          // Update active tab button
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          
+          // Show active tab content
+          tabContents.forEach(content => content.classList.remove('active'));
+          document.getElementById(`${tabName}-tab`).classList.add('active');
+        });
+      });
+      
+      // Click the dirt block
+      dirtBlock.addEventListener('click', function(e) {
+        // Calculate click value with bonuses
+        let clickValue = gameState.perClick;
+        
+        // Apply prestige bonus
+        clickValue *= gameState.prestigeBonus;
+        
+        // Lucky charm random bonus (5% chance of 3x)
+        if (gameState.luckyCharm > 0 && Math.random() < 0.05 * gameState.luckyCharm) {
+          clickValue *= 3;
+          createParticles(e, 'gold');
+        }
+        
+        // Increment dirt
+        gameState.dirt += clickValue;
+        updateDisplay();
+        
+        // Create particles
+        createParticles(e);
+        
+        // Check achievements
+        checkAchievements();
+      });
+      
+      // Tool upgrades
+      upgradeShovelBtn.addEventListener('click', function() {
+        if (gameState.dirt >= gameState.shovelCost) {
+          gameState.dirt -= gameState.shovelCost;
+          gameState.shovelLevel++;
+          gameState.perClick += 1;
+          gameState.shovelCost = Math.floor(gameState.shovelCost * 1.5);
+          upgradeShovelBtn.innerHTML = `Upgrade Shovel<br>Cost: ${gameState.shovelCost}`;
+          updateDisplay();
+        }
+      });
+      
+      upgradeGlovesBtn.addEventListener('click', function() {
+        if (gameState.dirt >= gameState.glovesCost) {
+          gameState.dirt -= gameState.glovesCost;
+          gameState.glovesLevel++;
+          gameState.perClick += 3;
+          gameState.glovesCost = Math.floor(gameState.glovesCost * 1.6);
+          upgradeGlovesBtn.innerHTML = `Mining Gloves<br>Cost: ${gameState.glovesCost}`;
+          updateDisplay();
+        }
+      });
+      
+      upgradeDrillBtn.addEventListener('click', function() {
+        if (gameState.dirt >= gameState.drillCost) {
+          gameState.dirt -= gameState.drillCost;
+          gameState.drillLevel++;
+          gameState.perClick += 10;
+          gameState.drillCost = Math.floor(gameState.drillCost * 1.7);
+          upgradeDrillBtn.innerHTML = `Hand Drill<br>Cost: ${gameState.drillCost}`;
+          updateDisplay();
+        }
+      });
+      
+      upgradeJackhammerBtn.addEventListener('click', function() {
+        if (gameState.dirt >= gameState.jackhammerCost) {
+          gameState.dirt -= gameState.jackhammerCost;
+          gameState.jackhammerLevel++;
+          gameState.perClick += 50;
+          gameState.jackhammerCost = Math.floor(gameState.jackhammerCost * 1.8);
+          upgradeJackhammerBtn.innerHTML = `Jackhammer<br>Cost: ${gameState.jackhammerCost}`;
+          updateDisplay();
+        }
+      });
+      
+      // Miner purchases
+      buyNoviceMinerBtn.addEventListener('click', function() {
+        if (gameState.dirt >= gameState.noviceMinerCost) {
+          gameState.dirt -= gameState.noviceMinerCost;
+          gameState.noviceMiners++;
+          gameState.noviceMinerCost = Math.floor(gameState.noviceMinerCost * 1.2);
+          buyNoviceMinerBtn.innerHTML = `Novice Miner<br>Cost: ${gameState.noviceMinerCost}`;
+          updateDisplay();
+          updateMinersDisplay();
+          checkAchievements();
+        }
+      });
+      
+      buySkilledMinerBtn.addEventListener('click', function() {
+        if (gameState.dirt >= gameState.skilledMinerCost) {
+          gameState.dirt -= gameState.skilledMinerCost;
+          gameState.skilledMiners++;
+          gameState.skilledMinerCost = Math.floor(gameState.skilledMinerCost * 1.3);
+          buySkilledMinerBtn.innerHTML = `Skilled Miner<br>Cost: ${gameState.skilledMinerCost}`;
+          updateDisplay();
+          updateMinersDisplay();
+          checkAchievements();
+        }
+      });
+      
+      buyExpertMinerBtn.addEventListener('click', function() {
+        if (gameState.dirt >= gameState.expertMinerCost) {
+          gameState.dirt -= gameState.expertMinerCost;
+          gameState.expertMiners++;
+          gameState.expertMinerCost = Math.floor(gameState.expertMinerCost * 1.4);
+          buyExpertMinerBtn.innerHTML = `Expert Miner<br>Cost: ${gameState.expertMinerCost}`;
+          updateDisplay();
+          updateMinersDisplay();
+          checkAchievements();
+        }
+      });
+      
+      buyMiningRobotBtn.addEventListener('click', function() {
+        if (gameState.dirt >= gameState.miningRobotCost) {
+          gameState.dirt -= gameState.miningRobotCost;
+          gameState.miningRobots++;
+          gameState.miningRobotCost = Math.floor(gameState.miningRobotCost * 1.5);
+          buyMiningRobotBtn.innerHTML = `Mining Robot<br>Cost: ${gameState.miningRobotCost}`;
+          updateDisplay();
+          updateMinersDisplay();
+          checkAchievements();
+        }
+      });
+      
+      // Upgrade miners
+      upgradeMinersBtn.addEventListener('click', function() {
+        if (gameState.dirt >= gameState.minerUpgradeCost) {
+          gameState.dirt -= gameState.minerUpgradeCost;
+          gameState.minerLevel++;
+          gameState.minerUpgradeCost = Math.floor(gameState.minerUpgradeCost * 1.7);
+          upgradeMinersBtn.innerHTML = `Upgrade All Miners<br>Cost: ${gameState.minerUpgradeCost}`;
+          updateDisplay();
+          updateMinersDisplay();
+        }
+      });
+      
+      // Special upgrades
+      buyLuckyCharmBtn.addEventListener('click', function() {
+        if (gameState.dirt >= gameState.luckyCharmCost) {
+          gameState.dirt -= gameState.luckyCharmCost;
+          gameState.luckyCharm++;
+          gameState.luckyCharmCost = Math.floor(gameState.luckyCharmCost * 2);
+          buyLuckyCharmBtn.innerHTML = `Lucky Charm<br>Cost: ${gameState.luckyCharmCost}`;
+          updateDisplay();
+          showAchievement("Lucky Charm activated! 5% chance for 3x clicks!");
+        }
+      });
+      
+      buyTreasureMapBtn.addEventListener('click', function() {
+        if (gameState.dirt >= gameState.treasureMapCost) {
+          gameState.dirt -= gameState.treasureMapCost;
+          gameState.treasureMap++;
+          gameState.treasureMapCost = Math.floor(gameState.treasureMapCost * 2);
+          buyTreasureMapBtn.innerHTML = `Treasure Map<br>Cost: ${gameState.treasureMapCost}`;
+          updateDisplay();
+          showAchievement("Treasure Map activated! 3% chance for bonus dirt!");
+        }
+      });
+      
+      buyMagnifyingGlassBtn.addEventListener('click', function() {
+        if (gameState.dirt >= gameState.magnifyingGlassCost) {
+          gameState.dirt -= gameState.magnifyingGlassCost;
+          gameState.magnifyingGlass++;
+          gameState.magnifyingGlassCost = Math.floor(gameState.magnifyingGlassCost * 2);
+          buyMagnifyingGlassBtn.innerHTML = `Magnifying Glass<br>Cost: ${gameState.magnifyingGlassCost}`;
+          updateDisplay();
+          showAchievement("Magnifying Glass activated! 10% more dirt per second!");
+        }
+      });
+      
+      // Prestige system
+      prestigeButton.addEventListener('click', function() {
+        if (gameState.dirt >= 1000) {
+          // Add golden shovel
+          gameState.prestigeCount++;
+          gameState.prestigeBonus = 1 + (gameState.prestigeCount * 0.2); // 20% bonus per golden shovel
+          
+          // Reset game but keep prestige bonuses
+          gameState.dirt = 0;
+          gameState.perClick = 1;
+          gameState.shovelLevel = 1;
+          gameState.glovesLevel = 0;
+          gameState.drillLevel = 0;
+          gameState.jackhammerLevel = 0;
+          
+          gameState.minerLevel = 1;
+          gameState.noviceMiners = 0;
+          gameState.skilledMiners = 0;
+          gameState.expertMiners = 0;
+          gameState.miningRobots = 0;
+          
+          // Reset costs
+          gameState.shovelCost = 10;
+          gameState.glovesCost = 50;
+          gameState.drillCost = 200;
+          gameState.jackhammerCost = 1000;
+          
+          gameState.noviceMinerCost = 25;
+          gameState.skilledMinerCost = 100;
+          gameState.expertMinerCost = 500;
+          gameState.miningRobotCost = 2500;
+          gameState.minerUpgradeCost = 50;
+          
+          // Update button text
+          upgradeShovelBtn.innerHTML = `Upgrade Shovel<br>Cost: ${gameState.shovelCost}`;
+          upgradeGlovesBtn.innerHTML = `Mining Gloves<br>Cost: ${gameState.glovesCost}`;
+          upgradeDrillBtn.innerHTML = `Hand Drill<br>Cost: ${gameState.drillCost}`;
+          upgradeJackhammerBtn.innerHTML = `Jackhammer<br>Cost: ${gameState.jackhammerCost}`;
+          
+          buyNoviceMinerBtn.innerHTML = `Novice Miner<br>Cost: ${gameState.noviceMinerCost}`;
+          buySkilledMinerBtn.innerHTML = `Skilled Miner<br>Cost: ${gameState.skilledMinerCost}`;
+          buyExpertMinerBtn.innerHTML = `Expert Miner<br>Cost: ${gameState.expertMinerCost}`;
+          buyMiningRobotBtn.innerHTML = `Mining Robot<br>Cost: ${gameState.miningRobotCost}`;
+          upgradeMinersBtn.innerHTML = `Upgrade All Miners<br>Cost: ${gameState.minerUpgradeCost}`;
+          
+          // Show prestige section
+          prestigeSection.style.display = 'block';
+          
+          // Achievement
+          if (!gameState.achievements.prestige1) {
+            gameState.achievements.prestige1 = true;
+            showAchievement("First Prestige! You've earned a Golden Shovel!");
+          }
+          
+          updateDisplay();
+          updateMinersDisplay();
+        }
+      });
+      
+      // Auto-miners function
+      setInterval(function() {
+        let totalMinerProduction = 0;
+        
+        // Calculate production from each miner type
+        if (gameState.noviceMiners > 0) {
+          const novicePower = minerTypes.novice.basePower * gameState.minerLevel;
+          totalMinerProduction += gameState.noviceMiners * novicePower;
+        }
+        
+        if (gameState.skilledMiners > 0) {
+          const skilledPower = minerTypes.skilled.basePower * gameState.minerLevel;
+          totalMinerProduction += gameState.skilledMiners * skilledPower;
+        }
+        
+        if (gameState.expertMiners > 0) {
+          const expertPower = minerTypes.expert.basePower * gameState.minerLevel;
+          totalMinerProduction += gameState.expertMiners * expertPower;
+        }
+        
+        if (gameState.miningRobots > 0) {
+          const robotPower = minerTypes.robot.basePower * gameState.minerLevel;
+          totalMinerProduction += gameState.miningRobots * robotPower;
+        }
+        
+        // Apply magnifying glass bonus
+        if (gameState.magnifyingGlass > 0) {
+          totalMinerProduction *= (1 + (gameState.magnifyingGlass * 0.1));
+        }
+        
+        // Apply prestige bonus
+        totalMinerProduction *= gameState.prestigeBonus;
+        
+        // Apply treasure map random bonus (3% chance)
+        if (gameState.treasureMap > 0 && Math.random() < 0.03 * gameState.treasureMap) {
+          totalMinerProduction *= 2;
+          showAchievement("Treasure found! Double dirt this second!");
+        }
+        
+        if (totalMinerProduction > 0) {
+          gameState.dirt += totalMinerProduction;
+          updateDisplay();
+          checkAchievements();
+        }
+      }, 1000);
+      
+      // Create particles when clicking
+      function createParticles(e, type = 'dirt') {
+        const rect = dirtBlock.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        for (let i = 0; i < 10; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          
+          if (type === 'gold') {
+            particle.style.backgroundColor = 'gold';
+            particle.style.boxShadow = '0 0 5px gold';
+          }
+          
+          document.body.appendChild(particle);
+          
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 2 + Math.random() * 4;
+          const distance = 30 + Math.random() * 70;
+          
+          const startX = centerX;
+          const startY = centerY;
+          
+          // Animation
+          let progress = 0;
+          const animate = () => {
+            progress += 0.02;
+            
+            if (progress >= 1) {
+              particle.remove();
+              return;
+            }
+            
+            const x = startX + Math.cos(angle) * distance * progress;
+            const y = startY + Math.sin(angle) * distance * progress - (40 * Math.pow(progress, 2));
+            
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            particle.style.opacity = 1 - progress;
+            
+            requestAnimationFrame(animate);
+          };
+          
+          requestAnimationFrame(animate);
+        }
+      }
+      
+      // Update miners display
+      function updateMinersDisplay() {
+        minerContainer.innerHTML = '';
+        
+        // Create miner summaries
+        if (gameState.noviceMiners > 0) {
+          createMinerInfo('novice');
+        }
+        
+        if (gameState.skilledMiners > 0) {
+          createMinerInfo('skilled');
+        }
+        
+        if (gameState.expertMiners > 0) {
+          createMinerInfo('expert');
+        }
+        
+        if (gameState.miningRobots > 0) {
+          createMinerInfo('robot');
+        }
+        
+        if (minerContainer.innerHTML === '') {
+          minerContainer.innerHTML = '<p>No miners hired yet!</p>';
+        }
+      }
+      
+      // Create miner info display
+      function createMinerInfo(type) {
+        let count, power;
+        
+        if (type === 'novice') {
+          count = gameState.noviceMiners;
+          power = minerTypes.novice.basePower * gameState.minerLevel;
+        } else if (type === 'skilled') {
+          count = gameState.skilledMiners;
+          power = minerTypes.skilled.basePower * gameState.minerLevel;
+        } else if (type === 'expert') {
+          count = gameState.expertMiners;
+          power = minerTypes.expert.basePower * gameState.minerLevel;
+        } else if (type === 'robot') {
+          count = gameState.miningRobots;
+          power = minerTypes.robot.basePower * gameState.minerLevel;
+        }
+        
+        // Apply magnifying glass and prestige bonuses
+        let totalPower = power;
+        if (gameState.magnifyingGlass > 0) {
+          totalPower *= (1 + (gameState.magnifyingGlass * 0.1));
+        }
+        totalPower *= gameState.prestigeBonus;
+        
+        const minerInfo = document.createElement('div');
+        minerInfo.className = 'miner-info';
+        
+        const name = document.createElement('div');
+        name.className = 'miner-name';
+        name.textContent = minerTypes[type].name;
+        
+        const countText = document.createElement('div');
+        countText.textContent = `Count: ${count}`;
+        
+        const powerText = document.createElement('div');
+        powerText.textContent = `Each: ${totalPower.toFixed(1)} DPS`;
+        
+        const totalText = document.createElement('div');
+        totalText.textContent = `Total: ${(count * totalPower).toFixed(1)} DPS`;
+        
+        minerInfo.appendChild(name);
+        minerInfo.appendChild(countText);
+        minerInfo.appendChild(powerText);
+        minerInfo.appendChild(totalText);
+        
+        minerContainer.appendChild(minerInfo);
+      }
+      
+      // Check for achievements
+      function checkAchievements() {
+        // Dirt milestones
+        if (gameState.dirt >= 10 && !gameState.achievements.dirt10) {
+          gameState.achievements.dirt10 = true;
+          showAchievement("Collected 10 dirt blocks!");
+        }
+        
+        if (gameState.dirt >= 100 && !gameState.achievements.dirt100) {
+          gameState.achievements.dirt100 = true;
+          showAchievement("Collected 100 dirt blocks!");
+        }
+        
+        if (gameState.dirt >= 500 && !gameState.achievements.dirt500) {
+          gameState.achievements.dirt500 = true;
+          showAchievement("Collected 500 dirt blocks!");
+        }
+        
+        if (gameState.dirt >= 5000 && !gameState.achievements.dirt5000) {
+          gameState.achievements.dirt5000 = true;
+          showAchievement("Collected 5000 dirt blocks!");
+        }
+        
+        // Miner milestones
+        const totalMiners = gameState.noviceMiners + gameState.skilledMiners + 
+                           gameState.expertMiners + gameState.miningRobots;
+        
+        if (totalMiners >= 5 && !gameState.achievements.miners5) {
+          gameState.achievements.miners5 = true;
+          showAchievement("Hired 5 miners!");
+        }
+        
+        // Update prestige button text and color
+        if (gameState.dirt >= 1000) {
+          prestigeButton.innerHTML = `Reset for Golden Shovel<br>READY!`;
+          prestigeButton.style.background = '#FFD700';
+          prestigeButton.style.boxShadow = '0 0 10px #FFD700';
+        } else {
+          prestigeButton.innerHTML = `Reset for Golden Shovel<br>Need: ${1000 - Math.floor(gameState.dirt)} more dirt`;
+          prestigeButton.style.background = '#9c27b0';
+          prestigeButton.style.boxShadow = '';
+        }
+      }
+      
+      // Show achievement notification
+      function showAchievement(text) {
+        achievementPopup.textContent = text;
+        achievementPopup.style.display = 'block';
+        
+        setTimeout(function() {
+          achievementPopup.style.opacity = '0';
+          
+          setTimeout(function() {
+            achievementPopup.style.display = 'none';
+            achievementPopup.style.opacity = '1';
+          }, 500);
+        }, 3000);
+      }
+      
+      // Update display
+      function updateDisplay() {
+        dirtCount.textContent = Math.floor(gameState.dirt);
+        perClick.textContent = Math.floor(gameState.perClick * gameState.prestigeBonus);
+        prestigeCount.textContent = gameState.prestigeCount;
+        prestigeBonus.textContent = ((gameState.prestigeBonus - 1) * 100).toFixed(0);
+        
+        // Calculate DPS
+        let totalDPS = 0;
+        
+        // Novice miners
+        if (gameState.noviceMiners > 0) {
+          totalDPS += gameState.noviceMiners * (minerTypes.novice.basePower * gameState.minerLevel);
+        }
+        
+        // Skilled miners
+        if (gameState.skilledMiners > 0) {
+          totalDPS += gameState.skilledMiners * (minerTypes.skilled.basePower * gameState.minerLevel);
+        }
+        
+        // Expert miners
+        if (gameState.expertMiners > 0) {
+          totalDPS += gameState.expertMiners * (minerTypes.expert.basePower * gameState.minerLevel);
+        }
+        
+        // Mining robots
+        if (gameState.miningRobots > 0) {
+          totalDPS += gameState.miningRobots * (minerTypes.robot.basePower * gameState.minerLevel);
+        }
+        
+        // Apply magnifying glass bonus
+        if (gameState.magnifyingGlass > 0) {
+          totalDPS *= (1 + (gameState.magnifyingGlass * 0.1));
+        }
+        
+        // Apply prestige bonus
+        totalDPS *= gameState.prestigeBonus;
+        
+        dirtPerSecond.textContent = totalDPS.toFixed(1);
+        
+        // Update button disabled states
+        upgradeShovelBtn.disabled = gameState.dirt < gameState.shovelCost;
+        upgradeGlovesBtn.disabled = gameState.dirt < gameState.glovesCost;
+        upgradeDrillBtn.disabled = gameState.dirt < gameState.drillCost;
+        upgradeJackhammerBtn.disabled = gameState.dirt < gameState.jackhammerCost;
+        
+        buyNoviceMinerBtn.disabled = gameState.dirt < gameState.noviceMinerCost;
+        buySkilledMinerBtn.disabled = gameState.dirt < gameState.skilledMinerCost;
+        buyExpertMinerBtn.disabled = gameState.dirt < gameState.expertMinerCost;
+        buyMiningRobotBtn.disabled = gameState.dirt < gameState.miningRobotCost;
+        upgradeMinersBtn.disabled = gameState.dirt < gameState.minerUpgradeCost;
+        
+        buyLuckyCharmBtn.disabled = gameState.dirt < gameState.luckyCharmCost;
+        buyTreasureMapBtn.disabled = gameState.dirt < gameState.treasureMapCost;
+        buyMagnifyingGlassBtn.disabled = gameState.dirt < gameState.magnifyingGlassCost;
+        
+        // Show prestige section if we have at least one golden shovel
+        if (gameState.prestigeCount > 0) {
+          prestigeSection.style.display = 'block';
+        }
+      }
+      
+      // Initial setup
+      updateDisplay();
+      updateMinersDisplay();
+      
+      // Save game state every 30 seconds
+      setInterval(function() {
+        localStorage.setItem('dirtClickerSave', JSON.stringify(gameState));
+      }, 30000);
+      
+      // Load game on startup
+      const savedGame = localStorage.getItem('dirtClickerSave');
+      if (savedGame) {
+        try {
+          const savedState = JSON.parse(savedGame);
+          gameState = savedState;
+          
+          // Update all button texts with loaded costs
+          upgradeShovelBtn.innerHTML = `Upgrade Shovel<br>Cost: ${gameState.shovelCost}`;
+          upgradeGlovesBtn.innerHTML = `Mining Gloves<br>Cost: ${gameState.glovesCost}`;
+          upgradeDrillBtn.innerHTML = `Hand Drill<br>Cost: ${gameState.drillCost}`;
+          upgradeJackhammerBtn.innerHTML = `Jackhammer<br>Cost: ${gameState.jackhammerCost}`;
+          
+          buyNoviceMinerBtn.innerHTML = `Novice Miner<br>Cost: ${gameState.noviceMinerCost}`;
+          buySkilledMinerBtn.innerHTML = `Skilled Miner<br>Cost: ${gameState.skilledMinerCost}`;
+          buyExpertMinerBtn.innerHTML = `Expert Miner<br>Cost: ${gameState.expertMinerCost}`;
+          buyMiningRobotBtn.innerHTML = `Mining Robot<br>Cost: ${gameState.miningRobotCost}`;
+          upgradeMinersBtn.innerHTML = `Upgrade All Miners<br>Cost: ${gameState.minerUpgradeCost}`;
+          
+          buyLuckyCharmBtn.innerHTML = `Lucky Charm<br>Cost: ${gameState.luckyCharmCost}`;
+          buyTreasureMapBtn.innerHTML = `Treasure Map<br>Cost: ${gameState.treasureMapCost}`;
+          buyMagnifyingGlassBtn.innerHTML = `Magnifying Glass<br>Cost: ${gameState.magnifyingGlassCost}`;
+          
+          updateDisplay();
+          updateMinersDisplay();
+          checkAchievements();
+          
+          // Show welcome back message
+          showAchievement("Welcome back to Dirt Block Clicker!");
+        } catch (e) {
+          console.error("Error loading saved game:", e);
+        }
+      }
+      
+      // Add reset button for testing
+      const resetButton = document.createElement('button');
+      resetButton.style.position = 'fixed';
+      resetButton.style.bottom = '10px';
+      resetButton.style.right = '10px';
+      resetButton.style.padding = '5px 10px';
+      resetButton.style.background = '#f44336';
+      resetButton.style.color = 'white';
+      resetButton.style.border = 'none';
+      resetButton.style.borderRadius = '5px';
+      resetButton.style.cursor = 'pointer';
+      resetButton.textContent = 'Reset Game';
+      resetButton.onclick = function() {
+        if (confirm("Are you sure you want to reset your game? All progress will be lost!")) {
+          localStorage.removeItem('dirtClickerSave');
+          location.reload();
+        }
+      };
+      document.body.appendChild(resetButton);
+    });
+  </script>
+</body>
+</html>
